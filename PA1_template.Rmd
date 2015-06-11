@@ -8,10 +8,33 @@ output:
 
 ## Loading and preprocessing the data
 
+In this part we download, unzip, and finally load the data from a CSV
+file:
 
+```{r, echo=TRUE}
+zip_filename <- "activity.zip"
+## The download command is optional as the file is already in the directory
+download.file("https://raw.githubusercontent.com/rdpeng/RepData_PeerAssessment1/master/activity.zip", zip_filename, method = "wget", mode="wb")
+f <- unz(description = zip_filename, filename = "activity.csv")
+dat <- read.csv(f)
+summary(dat)
+```
 
 ## What is mean total number of steps taken per day?
 
+Mean total number of steps taken per day is:
+
+```{r, echo=TRUE}
+aggregated_steps <- aggregate(dat$steps, by=list(dat$date), sum)
+steps_per_day <- na.omit(aggregated_steps$x)
+hist(steps_per_day)
+## summary(steps_per_day)
+```
+
+The mean total number of steps taken per day is
+`r format(mean(steps_per_day), nsmall=1)`,
+while the median total number of steps taken per day is
+`r median(steps_per_day)`.
 
 
 ## What is the average daily activity pattern?
