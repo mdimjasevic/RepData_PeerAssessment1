@@ -8,8 +8,8 @@ output:
 
 ## Loading and preprocessing the data
 
-In this part we download, unzip, and finally load the data from a CSV
-file:
+In this part we download, unzip, load, and finally filter the data
+from a CSV file:
 
 ```{r, echo=TRUE}
 zip_filename <- "activity.zip"
@@ -17,29 +17,39 @@ zip_filename <- "activity.zip"
 download.file("https://raw.githubusercontent.com/rdpeng/RepData_PeerAssessment1/master/activity.zip", zip_filename, method = "wget", mode="wb")
 f <- unz(description = zip_filename, filename = "activity.csv")
 dat <- read.csv(f)
-summary(dat)
+dat_filtered <- dat[complete.cases(dat), ]
 ```
 
 ## What is mean total number of steps taken per day?
 
-Mean total number of steps taken per day is:
-
+1. A histogram of the total number of steps taken each day is as
+   follows:
+   
 ```{r, echo=TRUE}
-aggregated_steps <- aggregate(dat$steps, by=list(dat$date), sum)
-steps_per_day <- na.omit(aggregated_steps$x)
+aggregated_steps <- aggregate(dat_filtered$steps, by=list(dat_filtered$date), sum)
+steps_per_day <- aggregated_steps$x
 hist(steps_per_day)
-## summary(steps_per_day)
 ```
 
-The mean total number of steps taken per day is
-`r format(mean(steps_per_day), nsmall=1)`,
-while the median total number of steps taken per day is
-`r median(steps_per_day)`.
+2. The mean total number of steps taken per day is
+   `r format(mean(steps_per_day), nsmall=1)`, while the median total
+   number of steps taken per day is `r median(steps_per_day)`.
 
 
 ## What is the average daily activity pattern?
 
+1. A time series plot of the 5-minute interval (x-axis) and the
+   average number of steps taken, averaged across all days (y-axis):
 
+```{r, echo=TRUE}
+steps_ts <- aggregate(dat_filtered$steps, by=list(dat_filtered$interval), mean)
+max_i <- which(steps_ts$x == max(steps_ts$x))
+plot(steps_ts$Group.1, steps_ts$x, type="l", xlab="5-minute intervals", ylab="Avg. number of steps")
+```
+
+2. A 5-minute interval with index `r max_i` (value
+   `r dat_filtered$interval[max_i]`), on average across all the days in
+   the dataset, contains the maximum number of steps (`r steps_ts$x[max_i]`).
 
 ## Imputing missing values
 
