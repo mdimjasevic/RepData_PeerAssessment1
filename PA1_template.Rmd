@@ -30,28 +30,63 @@ steps_per_day <- aggregated_steps$x
 hist(steps_per_day)
 ```
 
-2. The mean total number of steps taken per day is
-   `r format(mean(steps_per_day), nsmall=1)`, while the median total
-   number of steps taken per day is `r median(steps_per_day)`.
+The mean total number of steps taken per day is
+`r format(mean(steps_per_day), nsmall=1)`, while the median total
+number of steps taken per day is `r median(steps_per_day)`.
 
 
 ## What is the average daily activity pattern?
 
-1. A time series plot of the 5-minute interval (x-axis) and the
-   average number of steps taken, averaged across all days (y-axis):
+A time series plot of the 5-minute interval (x-axis) and the average
+number of steps taken, averaged across all days (y-axis):
 
 ```{r, echo=TRUE}
 steps_ts <- aggregate(dat_filtered$steps, by=list(dat_filtered$interval), mean)
 max_i <- which(steps_ts$x == max(steps_ts$x))
+head(steps_ts)
 plot(steps_ts$Group.1, steps_ts$x, type="l", xlab="5-minute intervals", ylab="Avg. number of steps")
 ```
 
-2. A 5-minute interval with index `r max_i` (value
-   `r dat_filtered$interval[max_i]`), on average across all the days in
-   the dataset, contains the maximum number of steps (`r steps_ts$x[max_i]`).
+A 5-minute interval with index `r max_i` (value
+`r dat_filtered$interval[max_i]`), on average across all the days in
+the dataset, contains the maximum number of steps
+(`r steps_ts$x[max_i]`).
 
 ## Imputing missing values
 
+```{r, echo=TRUE}
+num_missing_values <- nrow(dat) - nrow(dat_filtered)
+```
 
+The total number of missing values in the dataset is `r num_missing_values`.
+
+The following chunk replaces NA values in the original dataset with
+the mean of the corresponding 5-minute interval's value and stores the
+result in a new dataset:
+
+```{r, echo=TRUE}
+## Replace NA values with the mean of the corresponding 5-minute interval's value
+dat_modified <- dat
+dat_modified[is.na(dat_modified), 1] <- steps_ts$x[match(steps_ts$Group.1, dat_modified$interval)]
+## head(dat_modified,100)
+## summary(dat_modified)
+```
+
+A histogram of the total number of steps taken each day based on the modified data is as follows:
+
+```{r, echo=TRUE}
+aggregated_steps_modified <- aggregate(dat_modified$steps, by=list(dat_modified$date), sum)
+steps_per_day_modified <- aggregated_steps_modified$x
+hist(steps_per_day_modified)
+```
+
+The mean total number of steps taken per day in the modified dataset is
+`r format(mean(steps_per_day_modified), nsmall=1)`, while the median total
+number of steps taken per day is
+`r format(median(steps_per_day_modified), nsmall=1)`.
+
+While the mean is the same as in the original dataset, the median is
+slightly higher.
 
 ## Are there differences in activity patterns between weekdays and weekends?
+
