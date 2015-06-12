@@ -22,8 +22,7 @@ dat_filtered <- dat[complete.cases(dat), ]
 
 ## What is mean total number of steps taken per day?
 
-1. A histogram of the total number of steps taken each day is as
-   follows:
+A histogram of the total number of steps taken each day is as follows:
    
 ```{r, echo=TRUE}
 aggregated_steps <- aggregate(dat_filtered$steps, by=list(dat_filtered$date), sum)
