@@ -89,4 +89,3 @@ While the mean is the same as in the original dataset, the median is
 slightly higher.
 
 ## Are there differences in activity patterns between weekdays and weekends?
-

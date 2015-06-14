@@ -1,0 +1,53 @@
+<h2 id="loading-and-preprocessing-the-data">Loading and preprocessing the data</h2>
+<p>In this part we download, unzip, load, and finally filter the data from a CSV file:</p>
+<pre class="sourceCode r"><code class="sourceCode r">zip_filename &lt;-<span class="st"> &quot;activity.zip&quot;</span>
+## The download command is optional as the file is already in the directory
+<span class="kw">download.file</span>(<span class="st">&quot;https://raw.githubusercontent.com/rdpeng/RepData_PeerAssessment1/master/activity.zip&quot;</span>, zip_filename, <span class="dt">method =</span> <span class="st">&quot;wget&quot;</span>, <span class="dt">mode=</span><span class="st">&quot;wb&quot;</span>)
+f &lt;-<span class="st"> </span><span class="kw">unz</span>(<span class="dt">description =</span> zip_filename, <span class="dt">filename =</span> <span class="st">&quot;activity.csv&quot;</span>)
+dat &lt;-<span class="st"> </span><span class="kw">read.csv</span>(f)
+dat_filtered &lt;-<span class="st"> </span>dat[<span class="kw">complete.cases</span>(dat), ]</code></pre>
+<h2 id="what-is-mean-total-number-of-steps-taken-per-day">What is mean total number of steps taken per day?</h2>
+<p>A histogram of the total number of steps taken each day is as follows:</p>
+<pre class="sourceCode r"><code class="sourceCode r">aggregated_steps &lt;-<span class="st"> </span><span class="kw">aggregate</span>(dat_filtered$steps, <span class="dt">by=</span><span class="kw">list</span>(dat_filtered$date), sum)
+steps_per_day &lt;-<span class="st"> </span>aggregated_steps$x
+<span class="kw">hist</span>(steps_per_day)</code></pre>
+<figure>
+<img src="figure/unnamed-chunk-2-1.png" alt="plot of chunk unnamed-chunk-2" /><figcaption>plot of chunk unnamed-chunk-2</figcaption>
+</figure>
+<p>The mean total number of steps taken per day is 10766.19, while the median total number of steps taken per day is 10765.</p>
+<h2 id="what-is-the-average-daily-activity-pattern">What is the average daily activity pattern?</h2>
+<p>A time series plot of the 5-minute interval (x-axis) and the average number of steps taken, averaged across all days (y-axis):</p>
+<pre class="sourceCode r"><code class="sourceCode r">steps_ts &lt;-<span class="st"> </span><span class="kw">aggregate</span>(dat_filtered$steps, <span class="dt">by=</span><span class="kw">list</span>(dat_filtered$interval), mean)
+max_i &lt;-<span class="st"> </span><span class="kw">which</span>(steps_ts$x ==<span class="st"> </span><span class="kw">max</span>(steps_ts$x))
+<span class="kw">head</span>(steps_ts)</code></pre>
+<pre><code>##   Group.1         x
+## 1       0 1.7169811
+## 2       5 0.3396226
+## 3      10 0.1320755
+## 4      15 0.1509434
+## 5      20 0.0754717
+## 6      25 2.0943396</code></pre>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">plot</span>(steps_ts$Group<span class="fl">.1</span>, steps_ts$x, <span class="dt">type=</span><span class="st">&quot;l&quot;</span>, <span class="dt">xlab=</span><span class="st">&quot;5-minute intervals&quot;</span>, <span class="dt">ylab=</span><span class="st">&quot;Avg. number of steps&quot;</span>)</code></pre>
+<figure>
+<img src="figure/unnamed-chunk-3-1.png" alt="plot of chunk unnamed-chunk-3" /><figcaption>plot of chunk unnamed-chunk-3</figcaption>
+</figure>
+<p>A 5-minute interval with index 104 (value 835), on average across all the days in the dataset, contains the maximum number of steps (206.1698113).</p>
+<h2 id="imputing-missing-values">Imputing missing values</h2>
+<pre class="sourceCode r"><code class="sourceCode r">num_missing_values &lt;-<span class="st"> </span><span class="kw">nrow</span>(dat) -<span class="st"> </span><span class="kw">nrow</span>(dat_filtered)</code></pre>
+<p>The total number of missing values in the dataset is 2304.</p>
+<p>The following chunk replaces NA values in the original dataset with the mean of the corresponding 5-minute interval's value and stores the result in a new dataset:</p>
+<pre class="sourceCode r"><code class="sourceCode r">## Replace NA values with the mean of the corresponding 5-minute interval&#39;s value
+dat_modified &lt;-<span class="st"> </span>dat
+dat_modified[<span class="kw">is.na</span>(dat_modified), <span class="dv">1</span>] &lt;-<span class="st"> </span>steps_ts$x[<span class="kw">match</span>(steps_ts$Group<span class="fl">.1</span>, dat_modified$interval)]
+## head(dat_modified,100)
+## summary(dat_modified)</code></pre>
+<p>A histogram of the total number of steps taken each day based on the modified data is as follows:</p>
+<pre class="sourceCode r"><code class="sourceCode r">aggregated_steps_modified &lt;-<span class="st"> </span><span class="kw">aggregate</span>(dat_modified$steps, <span class="dt">by=</span><span class="kw">list</span>(dat_modified$date), sum)
+steps_per_day_modified &lt;-<span class="st"> </span>aggregated_steps_modified$x
+<span class="kw">hist</span>(steps_per_day_modified)</code></pre>
+<figure>
+<img src="figure/unnamed-chunk-6-1.png" alt="plot of chunk unnamed-chunk-6" /><figcaption>plot of chunk unnamed-chunk-6</figcaption>
+</figure>
+<p>The mean total number of steps taken per day in the modified dataset is 10766.19, while the median total number of steps taken per day is 10766.19.</p>
+<p>While the mean is the same as in the original dataset, the median is slightly higher.</p>
+<h2 id="are-there-differences-in-activity-patterns-between-weekdays-and-weekends">Are there differences in activity patterns between weekdays and weekends?</h2>
